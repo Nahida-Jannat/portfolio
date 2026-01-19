@@ -59,6 +59,39 @@ document.addEventListener('DOMContentLoaded', function () {
 
         contactForm.addEventListener('submit', function (e) {
             e.preventDefault();
+            // ===== RESTORE CONTACT FORM UI (IMPORTANT) =====
+const inputs = contactForm.querySelectorAll('input, textarea');
+
+inputs.forEach(input => {
+    const labelText = input.getAttribute('placeholder');
+    if (!labelText) return;
+
+    const label = document.createElement('label');
+    label.textContent = labelText;
+    input.insertAdjacentElement('afterend', label);
+    input.placeholder = '';
+
+    // Auto-fix label position on load
+    if (input.value.trim()) {
+        label.style.top = '-10px';
+        label.style.fontSize = '0.8rem';
+    }
+
+    input.addEventListener('focus', () => {
+        label.style.top = '-10px';
+        label.style.fontSize = '0.8rem';
+        label.style.color = 'var(--primary)';
+    });
+
+    input.addEventListener('blur', () => {
+        if (!input.value.trim()) {
+            label.style.top = '18px';
+            label.style.fontSize = '1rem';
+            label.style.color = 'var(--text-light)';
+        }
+    });
+});
+
 
             let hasError = false;
             inputs.forEach(input => {
@@ -113,3 +146,4 @@ document.addEventListener('DOMContentLoaded', function () {
     function animateOnScroll() { }
 
 });
+
