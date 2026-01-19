@@ -129,14 +129,14 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Enhanced contact form handling with Formspree
+    // Enhanced contact form handling with EmailJS
     const contactForm = document.getElementById('contactForm');
     const formMessage = document.getElementById('formMessage');
     
-    // Replace with your Formspree Form ID
-    // Get it from: https://formspree.io/
-    // Once you create a form, replace the action URL in HTML with your form URL
-    contactForm.action = "https://formspree.io/f/YOUR_FORM_ID_HERE";
+
+    (function() {
+        emailjs.init("e-SBr2SBWTWrV5VHM"); // Replace with your EmailJS Public Key
+    })();
     
     if (contactForm) {
         // Add labels dynamically
@@ -153,7 +153,12 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             
             // Get form data
-            const formData = new FormData(this);
+            const formData = {
+                from_name: this.querySelector('input[name="name"]').value,
+                reply_to: this.querySelector('input[name="_replyto"]').value,
+                subject: this.querySelector('input[name="subject"]').value,
+                message: this.querySelector('textarea[name="message"]').value
+            };
             
             // Validate
             let hasError = false;
@@ -178,16 +183,14 @@ document.addEventListener('DOMContentLoaded', function() {
             submitBtn.disabled = true;
             
             try {
-                // Send to Formspree
-                const response = await fetch(this.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                });
+
+                const response = await emailjs.send(
+                    "service_3cvbezk",    // Replace with your Service ID
+                    "template_fs0arj5",   // Replace with your Template ID
+                    formData
+                );
                 
-                if (response.ok) {
+                if (response.status === 200) {
                     // Add success animation
                     this.classList.add('success');
                     
@@ -205,12 +208,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         });
                     }, 1000);
                 } else {
-                    const data = await response.json();
-                    throw new Error(data.error || 'Failed to send message');
+                    throw new Error('Failed to send message');
                 }
             } catch (error) {
-                // Fallback to mailto if Formspree fails
-                console.log('Formspree failed, falling back to mailto:', error);
+                console.error('EmailJS Error:', error);
+                
+                // Fallback to mailto if EmailJS fails
+                showMessage('📧 Using alternative method...', 'info');
                 
                 const name = this.querySelector('input[name="name"]').value;
                 const email = this.querySelector('input[name="_replyto"]').value;
@@ -218,12 +222,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 const message = this.querySelector('textarea[name="message"]').value;
                 
                 // Create mailto link
-                const mailtoLink = `mailto:nahidajannat28@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`)}`;
+                const mailtoLink = `mailto:nahidajannatmayouree@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`)}`;
                 
                 // Open mail client
                 window.location.href = mailtoLink;
-                
-                showMessage('📧 Opening your email client... Please send the message.', 'success');
                 
                 // Reset form
                 setTimeout(() => {
